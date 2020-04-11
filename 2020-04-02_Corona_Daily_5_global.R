@@ -263,6 +263,7 @@ library(RDCOMClient)
 pdf.name<-paste0("C:\\Users\\Sandro\\Documents\\R\\Skripte\\Corona\\corona_report_",update$upd,".pdf")
 versand<-"sandrogrieger@gmx.de;oliver.weisbecker@gmx.de;elena.grieger@gmail.com;carolinegrieger@gmx.de;dorisgrieger@gmail.com;helgrieger@googlemail.com;t.kerschbaumer@processand.com;martinbloos@gmx.de"
 #versand<-"sandro.grieger@ruv.de"
+versand<-"sandrogrieger@gmx.de"
 ### Outlook Nutzen für Ausgabe
 OutApp<-COMCreate("Outlook.Application")
 outMail<-OutApp$CreateItem(0)
