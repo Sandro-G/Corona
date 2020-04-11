@@ -6,8 +6,7 @@ library(grid)
 library(gridExtra)
 
 setwd("C:/Users/Sandro/Documents/R/Skripte/Corona")
-
-
+options(encoding = "UTF-8")
 download.file("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv",
               destfile = "Input/jhu_confirmed.txt")
 download.file("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv",
