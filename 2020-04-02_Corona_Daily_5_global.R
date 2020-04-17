@@ -182,15 +182,15 @@ plot3<-jhu_clean%>%
 
 ###jhu_clean_prog, Prognoserechnung zur Erreichung der Kapazitätsgrenze
 
-# jhu_prog<-jhu_clean%>%
-#   filter(`Country/Region`=="Germany",estimator=="cfr_1")%>%
-#   mutate(Kapazität=820*34, Kapazität_bei_Ausbau=820*34+10000)%>%
-#   mutate(Prognose_Intensivfälle=round((Anz_conf)*0.05))%>%
-#   select(Date,Prognose_Intensivfälle,Kapazität,Kapazität_bei_Ausbau,Anz_conf,Anz_krank)%>%
-#   mutate(Status="Beobachtung")%>%
-#   mutate(Prognose_Intensivfälle_Szenario_1=Prognose_Intensivfälle)%>%
-#   mutate(Prognose_Intensivfälle_Szenario_2=Prognose_Intensivfälle)%>%
-#   mutate(Prognose_Intensivfälle_Szenario_3=Prognose_Intensivfälle)  
+ jhu_prog<-jhu_clean%>%
+  filter(`Country/Region`=="Germany",estimator=="cfr_1")%>%
+  mutate(Kapazität=820*34, Kapazität_bei_Ausbau=820*34+10000)%>%
+  mutate(Prognose_Intensivfälle=round((Anz_conf)*0.05))%>%
+  select(Date,Prognose_Intensivfälle,Kapazität,Kapazität_bei_Ausbau,Anz_conf,anz_krank)%>%
+  mutate(Status="Beobachtung")%>%
+  mutate(Prognose_Intensivfälle_Szenario_1=Prognose_Intensivfälle)%>%
+  mutate(Prognose_Intensivfälle_Szenario_2=Prognose_Intensivfälle)%>%
+  mutate(Prognose_Intensivfälle_Szenario_3=Prognose_Intensivfälle)
 
 rate_1<-0.4
 rate_2<-0.15
@@ -205,8 +205,8 @@ jhu_synth<-data.frame(Date=max(jhu_prog$Date)+ddays(1:tage),Anz_conf_prog_1=max(
   mutate(Prognose_Intensivfälle_Szenario_3=round((Anz_conf_prog_3)*0.05))%>%
   mutate(Status="Prognose")
 ##2. Variante nur kranke
-jhu_synth_krank<-data.frame(Date=max(jhu_prog$Date)+ddays(1:tage),Anz_conf_prog_1=max(jhu_prog$Anz_krank)*(1+rate_1)**(1:tage),
-                      Anz_conf_prog_2=max(jhu_prog$Anz_krank)*(1+rate_2)**(1:tage),Anz_conf_prog_3=max(jhu_prog$Anz_krank)*(1+rate_3)**(1:tage)                    )%>%
+jhu_synth_krank<-data.frame(Date=max(jhu_prog$Date)+ddays(1:tage),Anz_conf_prog_1=max(jhu_prog$anz_krank)*(1+rate_1)**(1:tage),
+                      Anz_conf_prog_2=max(jhu_prog$anz_krank)*(1+rate_2)**(1:tage),Anz_conf_prog_3=max(jhu_prog$anz_krank)*(1+rate_3)**(1:tage)                    )%>%
   mutate(`Country/Region`="Germany")%>%
   mutate(Kapazität=820*34, Kapazität_bei_Ausbau=820*34+10000)%>%
   mutate(Prognose_Intensivfälle_Szenario_1=round((Anz_conf_prog_1)*0.05))%>%
