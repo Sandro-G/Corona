@@ -76,7 +76,7 @@ plot1<-jhu_clean%>%
     filter(estimator=="cfr_1")%>%
     gather("keze","Menschen",c("Anz_conf","Anz_dea","Anz_rec","anz_krank"))%>%
     ggplot(aes(x=Date,y=Menschen,col=keze))+  scale_color_manual("keze",values = c("blue","red","green","grey"), breaks = c("Anz_conf", "Anz_dea","Anz_rec","anz_krank"),labels = c("Bestätigt", "Gestorben","Genesen","Krank"))+
-    geom_line()+facet_wrap(~`Country/Region`) +
+    geom_line()+facet_wrap(~`Country/Region`,scales="free_y") +
     scale_y_continuous(labels=scales::comma)+
     ggtitle("Gesamtzahlen")
 
@@ -87,7 +87,7 @@ plot1a<-jhu_clean%>%
   filter(!(`Country/Region`=="China"&Date==ymd("2020-02-13")))%>%
   gather("keze","Menschen",c("Anz_conf_1","Anz_dea_1","Anz_rec_1"))%>%
   ggplot(aes(x=Date,y=Menschen,col=keze))+  scale_color_manual("keze",values = c("blue","red","green"), breaks = c("Anz_conf_1", "Anz_dea_1","Anz_rec_1"),labels = c("Bestätigt", "Gestorben","Genesen"))+
-  geom_line()+facet_wrap(~`Country/Region`,scales="free")+
+  geom_line()+facet_wrap(~`Country/Region`,scales="free_y")+
   ggtitle("Tägliche Veränderung") 
 
 plot1aa<-jhu_clean%>%
@@ -96,8 +96,8 @@ plot1aa<-jhu_clean%>%
   filter(!(`Country/Region`=="China"&Date==ymd("2020-02-13")))%>%
   gather("keze","Menschen",c("Anz_krank_1"))%>%
   ggplot(aes(x=Date,y=Menschen,col=keze))+  scale_color_manual("keze",values = c("grey"), breaks = c("Anz_krank_1"),labels = c("Krank"))+
-  geom_line()+facet_wrap(~`Country/Region`,scales="free")+
-  ggtitle("Veränderung Kranke") 
+  geom_line()+facet_wrap(~`Country/Region`,scales="free_y")+
+  ggtitle("Tächliche Veränderung Kranke") 
 
 
 plot1b<-jhu_clean%>%
@@ -110,7 +110,7 @@ plot1b<-jhu_clean%>%
   geom_line()+facet_wrap(~`Country/Region`,scales="free_y") +scale_y_continuous(labels=scales::percent,limits=c(0,1))+ylab("Infektionsrate pro Tag")+
 #  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs"))+
   geom_smooth(method = "loess", span=0.5)+
-  ggtitle("Neuinfektionen pro Bestätigte Fälle")
+  ggtitle("Wird abgelöst: Neuinfektionen pro Bestätigte Fälle")
 
 plot1ba<-jhu_clean%>%
   filter(`Country/Region` %in% (list_top_c$`Country/Region`))%>%
@@ -122,7 +122,7 @@ plot1ba<-jhu_clean%>%
   geom_line()+facet_wrap(~`Country/Region`,scales="free_y") +scale_y_continuous(labels=scales::percent, limits=c(0,1))+ylab("Infektionsrate pro Tag")+
   #  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs"))+
   geom_smooth(method = "loess", span=0.5)+
-  ggtitle("Neuinfektionen pro erkrankte Fälle")
+  ggtitle("Neueinführung:Neuinfektionen pro erkrankte Fälle")
 
 est_text<-"Alle Schätzer betrachten nur die bestätigten Fälle. Die Frage: Was passiert, wenn ich mich infiziere? lässt sich daraus nur abschätzen.\n 
 Die blaue Linie ist in einer exponentiellen Wachstumsphase in der Regel zu niedrig . Die orange is zu hoch, wenn die Genesung länger dauert als der Tod\n
@@ -186,16 +186,26 @@ plot3<-jhu_clean%>%
   filter(`Country/Region`=="Germany",estimator=="cfr_1")%>%
   mutate(Kapazität=820*34, Kapazität_bei_Ausbau=820*34+10000)%>%
   mutate(Prognose_Intensivfälle=round((Anz_conf)*0.05))%>%
-  select(Date,Prognose_Intensivfälle,Kapazität,Kapazität_bei_Ausbau,Anz_conf,anz_krank)%>%
+  select(Date,Prognose_Intensivfälle,Kapazität,Kapazität_bei_Ausbau,Anz_conf)%>%
   mutate(Status="Beobachtung")%>%
   mutate(Prognose_Intensivfälle_Szenario_1=Prognose_Intensivfälle)%>%
   mutate(Prognose_Intensivfälle_Szenario_2=Prognose_Intensivfälle)%>%
   mutate(Prognose_Intensivfälle_Szenario_3=Prognose_Intensivfälle)
 
-rate_1<-0.4
-rate_2<-0.15
+ jhu_prog_krank<-jhu_clean%>%
+   filter(`Country/Region`=="Germany",estimator=="cfr_1")%>%
+   mutate(Kapazität=820*34, Kapazität_bei_Ausbau=820*34+10000)%>%
+   mutate(Prognose_Intensivfälle=round((anz_krank)*0.05))%>%
+   select(Date,Prognose_Intensivfälle,Kapazität,Kapazität_bei_Ausbau,anz_krank)%>%
+   mutate(Status="Beobachtung")%>%
+   mutate(Prognose_Intensivfälle_Szenario_1=Prognose_Intensivfälle)%>%
+   mutate(Prognose_Intensivfälle_Szenario_2=Prognose_Intensivfälle)%>%
+   mutate(Prognose_Intensivfälle_Szenario_3=Prognose_Intensivfälle) 
+
+rate_1<-0.15
+rate_2<-0.10
 rate_3<-0.05
-tage<-30
+tage<-50
 jhu_synth<-data.frame(Date=max(jhu_prog$Date)+ddays(1:tage),Anz_conf_prog_1=max(jhu_prog$Anz_conf)*(1+rate_1)**(1:tage),
                       Anz_conf_prog_2=max(jhu_prog$Anz_conf)*(1+rate_2)**(1:tage),Anz_conf_prog_3=max(jhu_prog$Anz_conf)*(1+rate_3)**(1:tage)                    )%>%
   mutate(`Country/Region`="Germany")%>%
@@ -204,26 +214,63 @@ jhu_synth<-data.frame(Date=max(jhu_prog$Date)+ddays(1:tage),Anz_conf_prog_1=max(
   mutate(Prognose_Intensivfälle_Szenario_2=round((Anz_conf_prog_2)*0.05))%>%
   mutate(Prognose_Intensivfälle_Szenario_3=round((Anz_conf_prog_3)*0.05))%>%
   mutate(Status="Prognose")
-##2. Variante nur kranke
-jhu_synth_krank<-data.frame(Date=max(jhu_prog$Date)+ddays(1:tage),Anz_conf_prog_1=max(jhu_prog$anz_krank)*(1+rate_1)**(1:tage),
-                      Anz_conf_prog_2=max(jhu_prog$anz_krank)*(1+rate_2)**(1:tage),Anz_conf_prog_3=max(jhu_prog$anz_krank)*(1+rate_3)**(1:tage)                    )%>%
-  mutate(`Country/Region`="Germany")%>%
-  mutate(Kapazität=820*34, Kapazität_bei_Ausbau=820*34+10000)%>%
-  mutate(Prognose_Intensivfälle_Szenario_1=round((Anz_conf_prog_1)*0.05))%>%
-  mutate(Prognose_Intensivfälle_Szenario_2=round((Anz_conf_prog_2)*0.05))%>%
-  mutate(Prognose_Intensivfälle_Szenario_3=round((Anz_conf_prog_3)*0.05))%>%
-  mutate(Status="Prognose")
-
 
 jhu_sum<-bind_rows(jhu_prog,jhu_synth)%>%
   select(-Anz_conf)%>%
   gather(Kat,Anzahl,c("Prognose_Intensivfälle_Szenario_1","Prognose_Intensivfälle_Szenario_2","Prognose_Intensivfälle_Szenario_3"))
+
+
+
+####neue Funktion, Prognose
+##Inputs: rate, Aktueller Stand als DF mit 20 einträgen inkl. Datum, Prognose-Horizont
+prognos<-function(rate,vector,ph){
+  data<-vector%>%
+    mutate(Status="Beobachtung")
+  for (i in 1:ph){
+  lastline<-slice(data,n())
+  prevline<-slice(data,n()-1)
+  lagline<-slice(data,n()-20)
+  newline<-data.frame(Date=lastline$Date+ddays(1),anz_krank=pmax(lastline$anz_krank*(1+rate)-lagline$Anz_conf_1,0),Anz_conf_1=lastline$anz_krank*(rate),Status="Prognose",stringsAsFactors = FALSE)
+  print(i)
+  print(newline)
+  data<-bind_rows(data,newline)
+  }
+return(data)
+}
+test<-jhu_clean%>%
+  ungroup()%>%
+  filter(`Country/Region`=="Germany",estimator=="cfr_1")%>%
+  select(Date,anz_krank,Anz_conf_1)
+
+###3facher Durchlauf für 3 raten
+synth_krank<-prognos(rate_1,test,tage)%>%
+  inner_join(prognos(rate_2,test,tage),by=c("Date","Status"),suffix=c("_rate_1","_rate_2"))%>%
+  inner_join(prognos(rate_3,test,tage),by=c("Date","Status"))%>%  
+  mutate(`Country/Region`="Germany")%>%
+  mutate(Kapazität=820*34, Kapazität_bei_Ausbau=820*34+10000)%>%
+  mutate(Prognose_Intensivfälle_Szenario_1=round((anz_krank_rate_1)*0.05))%>%
+  mutate(Prognose_Intensivfälle_Szenario_2=round((anz_krank_rate_2)*0.05))%>%
+  mutate(Prognose_Intensivfälle_Szenario_3=round((anz_krank)*0.05))
+
+
+jhu_sum_krank<-synth_krank%>%
+  select(-anz_krank)%>%
+  mutate(Status=factor(Status))%>%
+  gather(Kat,Anzahl,c("Prognose_Intensivfälle_Szenario_1","Prognose_Intensivfälle_Szenario_2","Prognose_Intensivfälle_Szenario_3"))%>%
+  mutate(Kat=factor(Kat))
 
 kap_text<-"Annahmen:\n
             - etwa 5% der Bestätigten Fälle benötigen ein Bett auf einer Intensivstation
             - gelb: Die Bettanzahl liegt bei 34 Betten pro 100.000 Einwohnern
             . rot: Die Bettanzahl konnte um 10.000 Betten ausgebaut werden"
 
+kap_text_krank<-"Die Simulation geht davon aus, dass die aktuell erkrankten 3 Wochen ansteckend sind. \n
+                Die Ansteckungsrate ist konstant. Es werden 3 Szenarien betrachtet\n
+Weitere Annahmen:\n
+            - etwa 5% der aktuell erkrankten Fälle benötigen ein Bett auf einer Intensivstation
+            - gelb: Die Bettanzahl liegt bei 34 Betten pro 100.000 Einwohnern
+            . rot: Die Bettanzahl konnte um 10.000 Betten ausgebaut werden"
+   
 
 
 plot1c<-ggplot(jhu_sum,aes(x=Date,y=Anzahl,linetype=Status))+geom_line(col="blue",cex=1.2)+  scale_linetype_manual(values=c("solid", "dotted"))+
@@ -235,6 +282,17 @@ plot1c<-ggplot(jhu_sum,aes(x=Date,y=Anzahl,linetype=Status))+geom_line(col="blue
   geom_hline(yintercept = jhu_sum$Kapazität_bei_Ausbau,col="red",cex=1.2)+
   scale_y_log10(breaks = c(1000,10000, 20000,50000,100000,1000000),labels=scales::comma)+
   ggtitle("Ereichung der Kapazitätsgrenze bei Intensivbetten")
+
+plot1ca<-ggplot(jhu_sum_krank,aes(x=Date,y=Anzahl,linetype=Status))+geom_line(col="blue",cex=1.2)+  scale_linetype_manual(values=c("solid", "dotted"))+
+  facet_wrap(~Kat,scales="free_y",labeller = labeller(Kat = 
+                                                        c("Prognose_Intensivfälle_Szenario_1" = paste0("Prognose Intensivfälle bei ",rate_1*100,"% Wachstum"),
+                                                          "Prognose_Intensivfälle_Szenario_2" = paste0("Prognose Intensivfälle bei ",rate_2*100,"% Wachstum"),
+                                                          "Prognose_Intensivfälle_Szenario_3" = paste0("Prognose Intensivfälle bei ",rate_3*100,"% Wachstum"))))+
+  geom_hline(yintercept = jhu_sum$Kapazität,col="yellow",cex=1.2)+
+  geom_hline(yintercept = jhu_sum$Kapazität_bei_Ausbau,col="red",cex=1.2)+
+  scale_y_log10(breaks = c(1000,10000, 20000,50000,100000,1000000),labels=scales::comma)+
+  ggtitle("Ereichung der Kapazitätsgrenze bei Intensivbetten")
+
 ###Ende Prognose
 ##Prognose gesunde Fälle
 cfr_country<-aktu_data%>%mutate(cfr_ang=(Tote_pro_Bestätigte+Adv_Estimator_2)/2)%>%
@@ -265,6 +323,7 @@ gen_text<-"Annahme:\n
 
 footnote<-grid.text(paste0(est_text),  gp=gpar(fontsize=8))
 footnote_kap<-grid.text(paste0(kap_text),  gp=gpar(fontsize=8))
+footnote_kap_krank<-grid.text(paste0(kap_text_krank),  gp=gpar(fontsize=8))
 footnote_gen<-grid.text(paste0(gen_text),  gp=gpar(fontsize=8))
 lay <- rbind(c(1),
              c(1),
@@ -278,11 +337,12 @@ plot1a
 plot1aa
 plot1b
 plot1ba
-grid.arrange(plot1c,footnote_kap,layout_matrix=lay)
+#grid.arrange(plot1c,footnote_kap,layout_matrix=lay)
+grid.arrange(plot1ca,footnote_kap_krank,layout_matrix=lay)
 grid.arrange(plot2,footnote,layout_matrix=lay)
 grid.newpage()
 grid.table(aktu_data,theme=ttheme_default(base_size=8,rect=element_rect(fill="blue")))
-plot3
+#plot3
 #grid.arrange(plot4,footnote_gen,layout_matrix=lay)
 dev.off()
 
@@ -303,7 +363,7 @@ OutApp<-COMCreate("Outlook.Application")
 outMail<-OutApp$CreateItem(0)
 outMail[["bcc"]]<-versand
 outMail[["subject"]]<-paste0("Corona Update ",as.character(Sys.Date()))
-outMail[["body"]]<-"Quelle: Johns Hopkins University. Seit 03.04. wieder inklusive geneneser Fälle"
+outMail[["body"]]<-"Quelle: Johns Hopkins University. Neue Inhalte!!! Prognosen jetzt auf Basis der aktuell Erkrankten"
 ###Attachment dynamisch
 outMail[["attachments"]]$Add(pdf.name)
 outMail$Send()
