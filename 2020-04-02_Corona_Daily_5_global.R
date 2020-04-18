@@ -70,6 +70,21 @@ list_top_c<-jhu_clean%>%
   select(`Country/Region`)%>%
   unique()
 
+###Standardtheme erstellen
+tt_stand<-theme(text=element_text(family="Bookman",size=14),plot.background = element_rect(fill = "grey25"),
+            panel.background = element_rect(fill="#FFFFCC"),
+            title=element_text(colour="white"),
+            axis.text = element_text(colour="white"),
+            axis.ticks = element_line(colour="white"),
+            axis.line = element_line(colour="white"),
+            legend.title = element_text(colour = "black"),
+            legend.position = "bottom",
+            plot.subtitle = element_text(size = 8),
+            plot.caption = element_text(size = 8)
+            )
+
+
+
 ###Plots für den PDF-Output
 plot1<-jhu_clean%>%
     filter(`Country/Region` %in% (list_top_c$`Country/Region`))%>%
@@ -78,7 +93,9 @@ plot1<-jhu_clean%>%
     ggplot(aes(x=Date,y=Menschen,col=keze))+  scale_color_manual("keze",values = c("blue","red","green","grey"), breaks = c("Anz_conf", "Anz_dea","Anz_rec","anz_krank"),labels = c("Bestätigt", "Gestorben","Genesen","Krank"))+
     geom_line()+facet_wrap(~`Country/Region`,scales="free_y") +
     scale_y_continuous(labels=scales::comma)+
-    ggtitle("Gesamtzahlen")
+    ggtitle("Gesamtzahlen")+
+    labs(caption="Quelle Johns-Hopkins-University",subtitle = "Täglich aktualisierte Coronafälle in der zeitlichen Entwicklung")+
+    tt_stand
 
 
 plot1a<-jhu_clean%>%
@@ -88,7 +105,9 @@ plot1a<-jhu_clean%>%
   gather("keze","Menschen",c("Anz_conf_1","Anz_dea_1","Anz_rec_1"))%>%
   ggplot(aes(x=Date,y=Menschen,col=keze))+  scale_color_manual("keze",values = c("blue","red","green"), breaks = c("Anz_conf_1", "Anz_dea_1","Anz_rec_1"),labels = c("Bestätigt", "Gestorben","Genesen"))+
   geom_line()+facet_wrap(~`Country/Region`,scales="free_y")+
-  ggtitle("Tägliche Veränderung") 
+  ggtitle("Tägliche Veränderung") +
+  labs(caption="Quelle Johns-Hopkins-University",subtitle = "Täglich aktualisierte Veränderung der Coronafälle in der zeitlichen Entwicklung")+
+  tt_stand
 
 plot1aa<-jhu_clean%>%
   filter(`Country/Region` %in% (list_top_c$`Country/Region`))%>%
@@ -97,8 +116,9 @@ plot1aa<-jhu_clean%>%
   gather("keze","Menschen",c("Anz_krank_1"))%>%
   ggplot(aes(x=Date,y=Menschen,col=keze))+  scale_color_manual("keze",values = c("grey"), breaks = c("Anz_krank_1"),labels = c("Krank"))+
   geom_line()+facet_wrap(~`Country/Region`,scales="free_y")+
-  ggtitle("Tächliche Veränderung Kranke") 
-
+  ggtitle("Tächliche Veränderung Kranke") +
+  labs(caption="Quelle Johns-Hopkins-University",subtitle = "Täglich aktualisierte Veränderung der aktuell erkrankten Coronafälle in der zeitlichen Entwicklung")+
+  tt_stand
 
 plot1b<-jhu_clean%>%
   filter(`Country/Region` %in% (list_top_c$`Country/Region`))%>%
@@ -110,7 +130,9 @@ plot1b<-jhu_clean%>%
   geom_line()+facet_wrap(~`Country/Region`,scales="free_y") +scale_y_continuous(labels=scales::percent,limits=c(0,1))+ylab("Infektionsrate pro Tag")+
 #  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs"))+
   geom_smooth(method = "loess", span=0.5)+
-  ggtitle("Wird abgelöst: Neuinfektionen pro Bestätigte Fälle")
+  ggtitle("Wird abgelöst: Neuinfektionen pro Bestätigte Fälle")+
+  labs(caption="Quelle Johns-Hopkins-University",subtitle = "Wachstum der bestätigten Fälle in der zeitlichen Entwicklung")+
+  tt_stand
 
 plot1ba<-jhu_clean%>%
   filter(`Country/Region` %in% (list_top_c$`Country/Region`))%>%
@@ -122,7 +144,9 @@ plot1ba<-jhu_clean%>%
   geom_line()+facet_wrap(~`Country/Region`,scales="free_y") +scale_y_continuous(labels=scales::percent, limits=c(0,1))+ylab("Infektionsrate pro Tag")+
   #  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs"))+
   geom_smooth(method = "loess", span=0.5)+
-  ggtitle("Neueinführung:Neuinfektionen pro erkrankte Fälle")
+  ggtitle("Neueinführung:Neuinfektionen pro erkrankte Fälle")+
+  labs(caption="Quelle Johns-Hopkins-University",subtitle = "Neuinfektionen je aktuellem Krankheitsfall in der zeitlichen Entwicklung")+
+  tt_stand
 
 est_text<-"Alle Schätzer betrachten nur die bestätigten Fälle. Die Frage: Was passiert, wenn ich mich infiziere? lässt sich daraus nur abschätzen.\n 
 Die blaue Linie ist in einer exponentiellen Wachstumsphase in der Regel zu niedrig . Die orange is zu hoch, wenn die Genesung länger dauert als der Tod\n
@@ -135,7 +159,9 @@ filter(`Country/Region` %in% (list_top_c$`Country/Region`))%>%
 ggplot(aes(x=Date,y=Value,col=estimator,linetype=est_quality))+geom_line()+facet_wrap(~`Country/Region`,scales="free_y")+
  scale_color_manual("estimator",values = c("blue","orange","grey"), breaks = c("cfr_1","cfr_2","cfr_advanced_2"),labels = c("Tote pro Bestätigte Fälle","Tote pro Abgeschlossene Fälle","Advanced Estimator"))+
   scale_y_continuous(labels=scales::percent,limits=c(0,0.5))+
- scale_linetype_manual(values=c("dotted", "solid"))+ggtitle("Schätzung der Todesfälle pro bestätigtem Fall anhand der Beobachtungen")
+ scale_linetype_manual(values=c("dotted", "solid"))+ggtitle("Schätzung der Fallsterblichkeit")+
+  labs(caption="Quelle Johns-Hopkins-University",subtitle = "3 verschiedene Schätzer zeigen die hohe Schätzunsicherheit auf")+
+  tt_stand
   
 
 
@@ -281,7 +307,9 @@ plot1c<-ggplot(jhu_sum,aes(x=Date,y=Anzahl,linetype=Status))+geom_line(col="blue
   geom_hline(aes(yintercept = jhu_sum$Kapazität),col="yellow",cex=1.2)+
   geom_hline(yintercept = jhu_sum$Kapazität_bei_Ausbau,col="red",cex=1.2)+
   scale_y_log10(breaks = c(1000,10000, 20000,50000,100000,1000000),labels=scales::comma)+
-  ggtitle("Ereichung der Kapazitätsgrenze bei Intensivbetten")
+  ggtitle("Ereichung der Kapazitätsgrenze bei Intensivbetten")+
+  labs(caption="Quelle Johns-Hopkins-University",subtitle = "Simulation auf Basis der Bestätigen Fälle")+
+  tt_stand
 
 plot1ca<-ggplot(jhu_sum_krank,aes(x=Date,y=Anzahl,linetype=Status))+geom_line(col="blue",cex=1.2)+  scale_linetype_manual(values=c("solid", "dotted"))+
   facet_wrap(~Kat,scales="free_y",labeller = labeller(Kat = 
@@ -291,7 +319,9 @@ plot1ca<-ggplot(jhu_sum_krank,aes(x=Date,y=Anzahl,linetype=Status))+geom_line(co
   geom_hline(yintercept = jhu_sum$Kapazität,col="yellow",cex=1.2)+
   geom_hline(yintercept = jhu_sum$Kapazität_bei_Ausbau,col="red",cex=1.2)+
   scale_y_log10(breaks = c(1000,10000, 20000,50000,100000,1000000),labels=scales::comma)+
-  ggtitle("Ereichung der Kapazitätsgrenze bei Intensivbetten")
+  ggtitle("Ereichung der Kapazitätsgrenze bei Intensivbetten")+
+  labs(caption="Quelle Johns-Hopkins-University",subtitle = "Simulation auf Basis der aktuell erkrankten Fälle mit Einbeziehung von Genesung")+
+  tt_stand
 
 ###Ende Prognose
 ##Prognose gesunde Fälle
