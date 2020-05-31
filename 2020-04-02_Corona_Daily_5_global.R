@@ -578,7 +578,8 @@ plot12<-test%>%
 
 
 ##
-
+source(file=paste0(p,"2020-05-24_bayern.R"),encoding="UTF-8")
+source(file=paste0(p,"2020-05-24_übersterblichkeit.R"),encoding="UTF-8")
          
 pdf(paste0(p,"corona_report_",update$upd,".pdf"),width=13)
 #pdf(paste0("corona_report_manuelle_Liste",update$upd,".pdf"),width=13)
@@ -586,15 +587,17 @@ pdf(paste0(p,"corona_report_",update$upd,".pdf"),width=13)
 #plot10
 #plot8
 #plot11
-plot12
-plot7
-plot1
-plot1a
-plot1aa
+print(plot12)
+print(plot7)
+print(plot1)
+print(plot1a)
+print(plot1aa)
 #plot1b
-plot1ba
+print(plot1ba)
 #grid.arrange(plot1c,footnote_kap,layout_matrix=lay)
 grid.arrange(plot1ca,footnote_kap_krank,layout_matrix=lay)
+print(plot_14)
+print(plot_15)
 grid.arrange(plot2,footnote,layout_matrix=lay)
 grid.newpage()
 grid.table(aktu_data,theme=ttheme_default(base_size=7,rect=element_rect(fill="blue")))
