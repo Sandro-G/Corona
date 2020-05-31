@@ -442,7 +442,7 @@ url<-"https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Fallzahlen.ht
 rki<-read_html(url)
 table<-html_table(rki)
 df<-table[[1]]
-rki_names<-c("Bundesland",df[1,2],df[1,3],df[1,4],df[1,5])
+rki_names<-c("Bundesland",df[1,2],df[1,3],df[1,4],df[1,5],df[1,6])
 names(df)<-rki_names
 df<-df%>%
   slice(-1)%>%
