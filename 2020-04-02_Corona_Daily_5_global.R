@@ -548,7 +548,8 @@ he_lk<-he_lk%>%
   unique()%>%
   group_by(`Kreis/Stadt`)%>%
   arrange(update)%>%
-  mutate(Anz_conf_1=`kumuliert bestätigte Fälle`-lag(`kumuliert bestätigte Fälle`)) 
+  mutate(Anz_conf_1=`kumuliert bestätigte Fälle`-lag(`kumuliert bestätigte Fälle`)) %>%
+  slice(1:10)
 test<-he_lk%>%group_by(`Kreis/Stadt`)%>%
   unique()%>%
   mutate(zeit=row_number())%>%
