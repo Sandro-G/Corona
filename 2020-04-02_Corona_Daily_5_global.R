@@ -66,7 +66,7 @@ list_top_c<-jhu_clean%>%
   top_n(1,Date)%>%
   ungroup()%>%
   dplyr::filter(estimator=="cfr_1")%>%
-  top_n(10,Anz_conf)%>%
+  top_n(11,Anz_conf)%>%
   select(`Country/Region`)%>%
   unique()
 
@@ -516,8 +516,9 @@ import_ordner<-function(ordner){
   }
   return(start)}
 
-he_lk<-import_ordner(paste0(p,"web/"))
-
+he_lk<-import_ordner(paste0(p,"web/"))%>%
+  mutate(`Kreis/Stadt`=str_replace_all(`Kreis/Stadt`,"-",""))%>%
+  mutate(`Kreis/Stadt`=str_replace_all(`Kreis/Stadt`," ",""))
 ###Ende Verarbeitung He_LK
 ##
 plot11<-filter(he_lk,`Kreis/Stadt`!="Gesamtergebnis")%>%
@@ -549,7 +550,9 @@ he_lk<-he_lk%>%
   group_by(`Kreis/Stadt`)%>%
   arrange(update)%>%
   mutate(Anz_conf_1=`kumuliert bestätigte Fälle`-lag(`kumuliert bestätigte Fälle`)) %>%
-  slice(1:10)
+arrange(desc(update))%>%
+    slice(1:10)%>%
+  arrange(update)
 test<-he_lk%>%group_by(`Kreis/Stadt`)%>%
   unique()%>%
   mutate(zeit=row_number())%>%
@@ -570,7 +573,7 @@ plot12<-test%>%
   ggplot(aes(x=as.Date(update),y=`letzte 7 Tage bestätigte Fälle`,col=kat))+geom_point()+
   coord_cartesian(ylim=c(0,NA))+
   #  geom_abline(data=test,aes(slope = delta_zeit,intercept =`(Intercept)` ,col=`Kreis/Stadt`))+
-  facet_wrap(~`Kreis/Stadt`,scales="free_y")+
+  facet_wrap(~`Kreis/Stadt`)+
   scale_colour_manual(values=c("green","blue","red"),labels=c("sinkend","gleichbleibend","steigend"))+
   tt_stand+
   scale_x_date(date_breaks = "1 week", date_labels = "%b-%d")+
