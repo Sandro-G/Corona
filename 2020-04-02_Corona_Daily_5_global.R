@@ -66,7 +66,7 @@ list_top_c<-jhu_clean%>%
   top_n(1,Date)%>%
   ungroup()%>%
   dplyr::filter(estimator=="cfr_1")%>%
-  top_n(11,Anz_conf)%>%
+  top_n(10,Anz_conf)%>%
   select(`Country/Region`)%>%
   unique()
 
@@ -76,8 +76,8 @@ list_man <-jhu_clean%>%
   ungroup()%>%
   select(`Country/Region`)%>%
   unique%>%
-  filter(`Country/Region` %in% c("Austria","Korea, South","Netherlands","Croatia","Germany","Sweden"))
-#list_top_c<-list_man
+  filter(`Country/Region` %in% c("Austria","Netherlands","Croatia","Germany","Sweden"))
+list_top_c<-bind_rows(list_man,list_top_c)
 
 ###Standardtheme erstellen
 tt_stand<-theme(text=element_text(family="Bookman",size=14),plot.background = element_rect(fill = "grey25"),
@@ -619,8 +619,8 @@ pdf2.name<-paste0("C:\\Users\\Sandro\\Documents\\R\\Skripte\\Corona\\corona_repo
 #Versandmodul
 ##Probleme mit dem Workspace
 library(RDCOMClient)
-
-versand<-"sandrogrieger@gmx.de;oliver.weisbecker@gmx.de;elena.grieger@gmail.com;carolinegrieger@gmx.de;dorisgrieger@gmail.com;helgrieger@googlemail.com;t.kerschbaumer@processand.com;martinbloos@gmx.de;rene@reneklein.de"
+##
+versand<-"sandrogrieger@gmx.de;oliver.weisbecker@gmx.de;carolinegrieger@gmx.de;elena.grieger@gmail.com;dorisgrieger@gmail.com;helgrieger@googlemail.com;t.kerschbaumer@processand.com;martinbloos@gmx.de;rene@reneklein.de"
 #versand<-"sandro.grieger@ruv.de"
 #versand<-"sandrogrieger@gmx.de"
 ### Outlook Nutzen für Ausgabe
