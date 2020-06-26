@@ -574,7 +574,7 @@ plot12<-test%>%
   coord_cartesian(ylim=c(0,NA))+
   #  geom_abline(data=test,aes(slope = delta_zeit,intercept =`(Intercept)` ,col=`Kreis/Stadt`))+
   facet_wrap(~`Kreis/Stadt`)+
-  scale_colour_manual(values=c("green","blue","red"),labels=c("sinkend","gleichbleibend","steigend"))+
+  scale_colour_manual(values=c("green","blue","red"),labels=c("sinkend","gleichbleibend","steigend"),drop=FALSE)+
   tt_stand+
   scale_x_date(date_breaks = "1 week", date_labels = "%b-%d")+
   labs(caption=paste0("Quelle Land Hessen, Update: ",now()),title="Trends je Landkreis",subtitle = "Letzte 7 Tage in der zeitlichen Entwicklung")+
