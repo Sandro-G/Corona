@@ -76,8 +76,8 @@ list_man <-jhu_clean%>%
   ungroup()%>%
   select(`Country/Region`)%>%
   unique%>%
-  filter(`Country/Region` %in% c("Austria","Korea, South","Netherlands","Croatia","Germany","Sweden"))
-#list_top_c<-list_man
+  filter(`Country/Region` %in% c("Austria","Netherlands","Croatia","Germany","Sweden"))
+list_top_c<-bind_rows(list_man,list_top_c)
 
 ###Standardtheme erstellen
 tt_stand<-theme(text=element_text(family="Bookman",size=14),plot.background = element_rect(fill = "grey25"),
@@ -516,8 +516,9 @@ import_ordner<-function(ordner){
   }
   return(start)}
 
-he_lk<-import_ordner(paste0(p,"web/"))
-
+he_lk<-import_ordner(paste0(p,"web/"))%>%
+  mutate(`Kreis/Stadt`=str_replace_all(`Kreis/Stadt`,"-",""))%>%
+  mutate(`Kreis/Stadt`=str_replace_all(`Kreis/Stadt`," ",""))
 ###Ende Verarbeitung He_LK
 ##
 plot11<-filter(he_lk,`Kreis/Stadt`!="Gesamtergebnis")%>%
@@ -548,7 +549,10 @@ he_lk<-he_lk%>%
   unique()%>%
   group_by(`Kreis/Stadt`)%>%
   arrange(update)%>%
-  mutate(Anz_conf_1=`kumuliert bestätigte Fälle`-lag(`kumuliert bestätigte Fälle`)) 
+  mutate(Anz_conf_1=`kumuliert bestätigte Fälle`-lag(`kumuliert bestätigte Fälle`)) %>%
+arrange(desc(update))%>%
+    slice(1:10)%>%
+  arrange(update)
 test<-he_lk%>%group_by(`Kreis/Stadt`)%>%
   unique()%>%
   mutate(zeit=row_number())%>%
@@ -569,8 +573,8 @@ plot12<-test%>%
   ggplot(aes(x=as.Date(update),y=`letzte 7 Tage bestätigte Fälle`,col=kat))+geom_point()+
   coord_cartesian(ylim=c(0,NA))+
   #  geom_abline(data=test,aes(slope = delta_zeit,intercept =`(Intercept)` ,col=`Kreis/Stadt`))+
-  facet_wrap(~`Kreis/Stadt`,scales="free_y")+
-  scale_colour_manual(values=c("green","blue","red"),labels=c("sinkend","gleichbleibend","steigend"))+
+  facet_wrap(~`Kreis/Stadt`)+
+  scale_colour_manual(values=c("green","blue","red"),labels=c("sinkend","gleichbleibend","steigend"),drop=FALSE)+
   tt_stand+
   scale_x_date(date_breaks = "1 week", date_labels = "%b-%d")+
   labs(caption=paste0("Quelle Land Hessen, Update: ",now()),title="Trends je Landkreis",subtitle = "Letzte 7 Tage in der zeitlichen Entwicklung")+
@@ -615,8 +619,8 @@ pdf2.name<-paste0("C:\\Users\\Sandro\\Documents\\R\\Skripte\\Corona\\corona_repo
 #Versandmodul
 ##Probleme mit dem Workspace
 library(RDCOMClient)
-
-versand<-"sandrogrieger@gmx.de;oliver.weisbecker@gmx.de;elena.grieger@gmail.com;carolinegrieger@gmx.de;dorisgrieger@gmail.com;helgrieger@googlemail.com;t.kerschbaumer@processand.com;martinbloos@gmx.de;rene@reneklein.de"
+##
+versand<-"sandrogrieger@gmx.de;oliver.weisbecker@gmx.de;carolinegrieger@gmx.de;elena.grieger@gmail.com;dorisgrieger@gmail.com;helgrieger@googlemail.com;t.kerschbaumer@processand.com;martinbloos@gmx.de;rene@reneklein.de"
 #versand<-"sandro.grieger@ruv.de"
 #versand<-"sandrogrieger@gmx.de"
 ### Outlook Nutzen für Ausgabe
