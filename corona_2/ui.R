@@ -7,6 +7,8 @@ shinyUI(fluidPage(
 
     # Sidebar with a slider input for number of bins
     navbarPage("Sandros Corona-Dashboard",
+            tabPanel("Einstellungen",
+                     radioButtons("keze","Kennzahlen",choices=c("Absolut","Inzidenz"),selected = "Absolut")                    ),
             tabPanel("Entwicklung Deutschland",
                      
                      sidebarLayout(
@@ -26,10 +28,8 @@ shinyUI(fluidPage(
             tabPanel("Entwicklung Landkreise",                     
                 sidebarLayout(
                     sidebarPanel("Auswahl",
-                                 selectInput("lk","Landkreis auswählen",choices = c("Rheingau","Wiesbaden","Frankfurt","SK Mainz","Westerwald"),selected = "Rheingau")
-                    ),
-                    mainPanel(
-                        tags$h2("Entwicklung der Corona-Zahlen je Landkreis"),
+                                 selectInput("lk","Landkreis auswählen",choices = c("Rheingau","Wiesbaden","Frankfurt","SK Mainz","Westerwald"),selected = "Rheingau")),
+                        mainPanel(tags$h2("Entwicklung der Corona-Zahlen je Landkreis"),
                         # plotOutput("he"),
                          plotOutput("plot_lk_2")
                         )

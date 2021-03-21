@@ -25,15 +25,17 @@ library(stringr)
 )}
 
 
+ab_datum<-today()-90
+
 #Dataload
 ##JHU-Data
 
 options(encoding = "UTF-8")
 
-input<-vector()
-input$dauer_g<-20
-input$dauer_t<-7
-input$dauer_t_3<-10
+# input<-vector()
+# input$dauer_g<-20
+# input$dauer_t<-7
+# input$dauer_t_3<-10
 
 
 
@@ -42,20 +44,21 @@ input$dauer_t_3<-10
 ##RKI-Data
 
 
-agg<-readRDS("corona_2/www/rki.RDS")
-
+#agg<-readRDS("corona_2/www/rki.rds")
+agg<-readRDS("www/rki.rds")
 
 
 plot_tm<-function(land)   { agg%>%
     filter(Bundesland == land)%>%
     filter(estimator=="cfr_1")%>%
+    filter(Date>=ab_datum)%>%
     gather("keze","Menschen",c("Anz_conf","Anz_dea","Anz_rec"))%>%
     group_by(Date,Bundesland,keze)%>%
     summarise(Menschen=sum(Menschen))%>%
-    ggplot(aes(x=Date,y=Menschen,col=keze),height=600)+  
+    ggplot(aes(x=Date,y=Menschen,fill=keze),height=600)+  
     scale_color_manual("keze",values = c("blue","red","green"), breaks = c("Anz_conf", "Anz_dea","Anz_rec"),
                                                                  labels = c("Bestätigt", "Gestorben","Genesen"))+
-    geom_line()+
+    geom_col()+
     scale_y_continuous(labels=scales::comma)+
     coord_cartesian(ylim=c(0,NA))+  
     ggtitle("Tägliche Veränderung")+
@@ -63,9 +66,30 @@ plot_tm<-function(land)   { agg%>%
     tt_stand+
     facet_grid(keze~.,scales="free_y")
 }
+
+plot_tm_inz<-function(land)   { agg%>%
+        filter(Bundesland == land)%>%
+        filter(estimator=="cfr_1")%>%
+        filter(Date>=ab_datum)%>%
+        gather("keze","Menschen",c("Anz_conf","Anz_dea","Anz_rec"))%>%
+        group_by(Date,Bundesland,keze)%>%
+        summarise(Menschen=sum(Menschen)/sum(Einwohner)*100000)%>%
+        ggplot(aes(x=Date,y=Menschen,fill=keze),height=600)+  
+        scale_color_manual("keze",values = c("blue","red","green"), breaks = c("Anz_conf", "Anz_dea","Anz_rec"),
+                           labels = c("Bestätigt", "Gestorben","Genesen"))+
+        geom_col()+
+        scale_y_continuous(labels=scales::comma)+
+        coord_cartesian(ylim=c(0,NA))+  
+        ggtitle("Tägliche Veränderung")+
+        labs(caption=paste0("Quelle RKI, Update: ",now()),subtitle = "Täglich aktualisierte Coronafälle in der zeitlichen Entwicklung")+
+        tt_stand+
+        facet_grid(keze~.,scales="free_y")
+}
+
 plot_tm_d<-function(land)   { agg%>%
         filter(Bundesland == land)%>%
         filter(estimator=="cfr_1")%>%
+        filter(Date>=ab_datum)%>%
         gather("keze","Menschen",c("Anz_conf_1","Anz_dea_1","Anz_rec_1"))%>%
         group_by(Date,Bundesland,keze)%>%
         summarise(Menschen=sum(Menschen))%>%
@@ -113,7 +137,7 @@ plot_tm_d<-function(land)   { agg%>%
 
 plot_lk<-function(lk){
     filter(he_lk, str_detect(tolower(Kreis_Stadt),tolower(lk)) )%>%
-
+        filter(Date>=ab_datum)%>%
         ggplot(aes(x = update, y = letzte_7_Tage_Inzidenz,group=Kreis_Stadt),height=300) +
         geom_line(
             size = 0.5
@@ -127,11 +151,12 @@ plot_lk<-function(lk){
 plot_lk_rki<-function(lk){
     filter(agg, str_detect(tolower(Landkreis),tolower(lk)) )%>%
     filter(estimator=="cfr_1")%>%
+    filter(Date>=ab_datum)%>%
     group_by(Landkreis,Date)%>%
     summarise(Bestätigt=sum(Anz_conf),Gestorben=sum(Anz_dea),Genesen=sum(Anz_rec))%>%
     gather("Dimension","Anzahl",Bestätigt:Genesen)%>%
-        ggplot(aes(x = Date, y = Anzahl,col=Dimension),height=300) +
-        geom_line(
+        ggplot(aes(x = Date, y = Anzahl,fill=Dimension),height=300) +
+        geom_col(
             size = 0.5
         ) +
         tt_stand + ggtitle("Tägliche Fälle im Landkreis") +
@@ -140,6 +165,27 @@ plot_lk_rki<-function(lk){
         facet_grid(Dimension~.,scales = "free_y")
     
 }
+
+plot_lk_rki_inz<-function(lk){
+    filter(agg, str_detect(tolower(Landkreis),tolower(lk)) )%>%
+        filter(estimator=="cfr_1")%>%
+        filter(Date>=ab_datum)%>%
+        group_by(Landkreis,Date)%>%
+        summarise(Bestätigt=sum(Anz_conf),Gestorben=sum(Anz_dea),Genesen=sum(Anz_rec),Einwohner=sum(Einwohner))%>%
+        gather("Dimension","Anzahl",Bestätigt:Genesen)%>%
+        mutate(Anzahl=Anzahl/Einwohner*100000)%>%
+        ggplot(aes(x = Date, y = Anzahl,fill=Dimension),height=300) +
+        geom_col(
+            size = 0.5
+        ) +
+        tt_stand + ggtitle("Tägliche Fälle pro 100.000 Einwohner im Landkreis") +
+        xlab("Datum") + ylab("Anzahl") +
+        labs(caption = paste0("Quelle RKI, update: "))+
+        facet_grid(Dimension~.,scales = "free_y")
+    
+}
+
+
 plot_lk_rki_7d<-function(lk){
     filter(agg, str_detect(tolower(Landkreis),tolower(lk)) )%>%
         filter(estimator=="cfr_1")%>%
@@ -171,7 +217,8 @@ shinyServer(function(input, output) {
 
     
 output$plot_gesamt<-renderPlot(
-    plot_tm(input$land)
+    if (input$keze=="Absolut") plot_tm(input$land) else plot_tm_inz(input$land)
+
 )
 # output$plot_delta<-renderPlot(
 #     plot_tm_d(input$land)
@@ -188,7 +235,12 @@ output$plot_gesamt<-renderPlot(
 # )
 
 # output$plot_lk_2<-renderPlot(plot_lk(input$lk))
-output$plot_lk_2<-renderPlot(plot_lk_rki(input$lk))
+output$plot_lk_2<-renderPlot(
+    
+    if (input$keze=="Absolut") plot_lk_rki(input$lk) else plot_lk_rki_inz(input$lk)   
+
+)    
+                             
 
 # output$table1<-DT::renderDataTable(aktu_data)
 })

@@ -133,4 +133,25 @@ exp_2<-joined%>%
   transmute(Landkreis,Einwohner=EWjetzt,Dichte=`Bev.-dichte(EW/km²)`)
 
 exp_ges<-bind_rows(exp,exp_2)
-saveRDS(exp_ges,"bev_lk.rds")
+exp_ges<-readRDS("bev_lk.rds")
+
+exp_ges<-exp_ges%>%
+  mutate(Einwohner=str_extract(Einwohner,"^\\d+\\.\\d+"))%>%
+  mutate(Einwohner=str_remove(Einwohner,"[.]"))%>%
+  mutate(Einwohner=as.numeric(Einwohner))
+
+###es geht auch ohne fuzzy, sogar besser, da die ids dabei sind
+exp<-df%>%
+  transmute(IdLandkreis=KrS,Einwohner=Einw.,Dichte=`Bev.D.Ew./km²`)
+exp_2<-df_sk%>%
+  transmute(IdLandkreis=`Stadtkreis ID`,Einwohner=EWjetzt,Dichte=`Bev.-dichte(EW/km²)`)
+
+exp_ges<-bind_rows(exp,exp_2)
+
+exp_ges<-exp_ges%>%
+  mutate(Einwohner=str_extract(Einwohner,"^\\d+\\.\\d+"))%>%
+  mutate(Einwohner=str_remove(Einwohner,"[.]"))%>%
+  mutate(Einwohner=as.numeric(Einwohner))%>%
+  mutate(IdLandkreis=str_pad(IdLandkreis,5,"left","0"))
+
+saveRDS(exp_ges,"corona_2/www/bev_lk.rds")

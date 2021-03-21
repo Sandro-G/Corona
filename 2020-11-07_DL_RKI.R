@@ -7,14 +7,23 @@ library(ggplot2)
 library(magrittr)
 library(tidyr)
 library(forcats)
-rki_csv<-read_csv("https://opendata.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0.csv")
+#rki_csv<-read_csv("https://opendata.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0.csv")
+
+download.file("https://opendata.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0.csv","/opt/shiny-server/samples/sample-apps/corona/www/rki.csv")
+rki_csv<-read_csv("/opt/shiny-server/samples/sample-apps/corona/www/rki.csv")
+bev<-readRDS("/opt/shiny-server/samples/sample-apps/corona/www/bev_lk.rds")
+
+###für experimente lokal
+# names(rki_csv)
+# glimpse(rki_csv)
+# bev<-readRDS("corona_2/www/bev_lk.rds")
 
 input<-vector()
 input$dauer_g<-20
 input$dauer_t<-7
 input$dauer_t_3<-10
 
-bev<-readRDS("corona_2/www/bev_lk.RDS")
+
 
 
 agg<-rki_csv%>%
@@ -49,8 +58,11 @@ agg<-rki_csv%>%
   gather("estimator","Value",c("cfr_1","cfr_2","cfr_advanced_2"))
 
 agg<-agg%>%
-  group_by(Bundesland, Landkreis,Date,estimator)%>%
+  group_by(Bundesland, Landkreis,Date,estimator,Einwohner)%>%
   summarise(Anz_conf=sum(Anz_conf),Anz_dea=sum(Anz_dea),Anz_rec=sum(Anz_rec),
             Anz_conf_1=sum(Anz_conf_1),Anz_dea_1=sum(Anz_dea_1),Anz_rec_1=sum(Anz_rec_1))
+###add file with trends
 
-saveRDS(agg,"/opt/shiny-server/samples/sample-apps/corona/www/rki.RDS")
+
+##saveRDS(agg,"corona_2/www/rki.RDS")
+saveRDS(agg,"/opt/shiny-server/samples/sample-apps/corona/www/rki.rds")
